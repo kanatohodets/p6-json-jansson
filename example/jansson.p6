@@ -9,12 +9,7 @@ say $json.refcount;
 say $json.type;
 
 # there's a race somewhere.
-my $foo = $json.get(0);
+my $foo = $json.get(0).get("tags").get(2);
 say $foo;
-my $tags = $foo.get("tags");
-say $tags;
-my $first = $tags.get(0);
-say $first;
+say $foo for 1 .. 15;
 
-say "refcounts: ";
-say $_.refcount for ($json, $foo, $tags, $first);
