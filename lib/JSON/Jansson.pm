@@ -16,13 +16,14 @@ class JSONStruct is repr('CStruct') {
 
 class JSON is repr('CPointer') {
     sub json_loads(Str, int, Error) returns JSON is native("libjansson") { * }
-    sub json_dumps(JSON) returns Str is native("libjansson") { * }
+    sub json_dumps(JSON, int) returns Str is native("libjansson") { * }
     sub json_decref(JSON) is native("libjansson") { * }
     sub json_array_get(JSON, int) returns JSON is native("libjansson") { * }
     sub json_object_get(JSON, Str) returns JSON is native("libjansson") { * }
 
     method new (Str $data) {
         my $err = Error.new();
+        # 0x4 for 'JSON_DECODE_ANY'
         my $json = json_loads($data, 0x4, $err);
     }
 
@@ -38,7 +39,8 @@ class JSON is repr('CPointer') {
         $struct.refcount;
     }
 
-    method gist() { json_dumps(self); }
+    # 0x200 for 'JSON_ENCODE_ANY'
+    method gist() { json_dumps(self, 0x200); }
 
     method type() {
         my $struct = nativecast(JSONStruct, self);
