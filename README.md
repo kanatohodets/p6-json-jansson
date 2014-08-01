@@ -2,7 +2,7 @@
 
 This is a basic Perl 6 binding to libjansson: a C library for manipulating JSON data.
 
-Still pretty rough! While JSON objects attempt to emulate P6 hashes or arrays, they don't have all the same capabilities.  In particular, assignment isn't yet implemented.
+Still pretty rough! While JSON objects attempt to emulate P6 hashes or arrays, they don't have all the same capabilities.  In particular, assignment/building up new objects and consuming P6 types into JSON are not yet implemented.
 
 JSON::Jansson is an appropriate choice if you're willing to trade features for speed. While JSON::Tiny is much more flexible and powerful, JSON::Jansson is (comparatively) blindingly fast.
 
