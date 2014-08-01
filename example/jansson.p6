@@ -7,9 +7,8 @@ my $data = $fh.slurp;
 my $json = JSON.new($data);
 say $json.refcount;
 say $json.type;
-
-# there's a race somewhere.
-my $foo = $json.get(0).get("tags").get(2);
-say $foo;
-say $foo for 1 .. 15;
+say $json[0]<tags>[0 .. 4];
+say $json[0].keys;
+$json[0].delete_key('friends');
+say $json[0].keys;
 
