@@ -60,7 +60,6 @@ class JSON is repr('CPointer') {
             when Real { json_real_value(self) }
             when True { True }
             when False { False }
-            # null
             when Nil { Nil }
         }
     }
@@ -68,7 +67,6 @@ class JSON is repr('CPointer') {
     method type() {
         my $struct = nativecast(Struct, self);
         given $struct.type {
-            # object
             when 0 { Hash }
             when 1 { Array }
             when 2 { Str }
@@ -76,7 +74,6 @@ class JSON is repr('CPointer') {
             when 4 { Real }
             when 5 { Bool::True }
             when 6 { Bool::False }
-            # null
             when 7 { Nil }
         }
     }
