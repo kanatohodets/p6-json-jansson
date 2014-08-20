@@ -116,8 +116,9 @@ class JSON::Object is JSON::Document does Associative {
 
     method keys() {
         my $iter = ObjectIter.new($.json);
-        my @keys := gather while ($iter = self.iter_next($iter)) {
+        my @keys := gather while $iter {
             take $iter.key();
+            $iter = self.iter_next($iter);
         }
     }
 
