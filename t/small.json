@@ -18,6 +18,15 @@
       "magna",
       "tempor"
     ],
+    "dup-tags": [
+      "occaecat",
+      "sit",
+      "quis",
+      "laboris",
+      "proident",
+      "magna",
+      "tempor"
+    ],
     "friends": [
       {
         "id": 0,
@@ -33,6 +42,11 @@
       }
     ],
     "greeting": "Hello, undefined! You have 4 unread messages.",
-    "favoriteFruit": "banana"
+    "favoriteFruit": "banana",
+    "system": {
+        "Origin": [ 0, 0, 0 ],
+        "X Axis": [ 1, 0, 0 ],
+        "Y Axis": [ 0, 1, 0 ]
+    }
   }
 ]
