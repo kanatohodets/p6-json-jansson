@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "53d8930f6079e3e0e6667f6f",
+    "index": 0,
+    "guid": "fa418d28-e32d-4854-81c7-19de7bca5127",
+    "isActive": true,
+    "balance": "$3,879.25",
+    "age": 34,
+    "registered": "2014-05-22T19:18:51 +05:00",
+    "latitude": 83.379757,
+    "longitude": 159.799064,
+    "tags": [
+      "occaecat",
+      "sit",
+      "quis",
+      "laboris",
+      "proident",
+      "magna",
+      "tempor"
+    ],
+    "friends": [
+      {
+        "id": 0,
+        "name": "Chasity Cervantes"
+      },
+      {
+        "id": 1,
+        "name": "Gay Perkins"
+      },
+      {
+        "id": 2,
+        "name": "Jeanie Craig"
+      }
+    ],
+    "greeting": "Hello, undefined! You have 4 unread messages.",
+    "favoriteFruit": "banana"
+  }
+]
