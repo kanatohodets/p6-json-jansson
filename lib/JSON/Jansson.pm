@@ -255,6 +255,7 @@ class JSON::Array is JSON::Document does Positional {
         my @data := gather for ^self.len -> $index {
             take json_array_get($.jansson, $index).specify.val;
         }
+        @data.eager;
     }
 }
 
