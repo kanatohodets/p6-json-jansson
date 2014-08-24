@@ -1,6 +1,7 @@
 use v6;
 use NativeCall;
 
+class JSON::Document { ... };
 class JSON::Array { ... };
 class JSON::Object { ... };
 
@@ -25,6 +26,13 @@ class JSON is repr('CPointer') {
     sub json_integer_value(JSON) returns int is native("libjansson") { * }
     sub json_real_value(JSON) returns num is native("libjansson") { * }
 
+    sub json_string(Str) returns JSON is native("libjansson") { * }
+    sub json_integer(int) returns JSON is native("libjansson") { * }
+    sub json_real(num) returns JSON is native("libjansson") { * }
+    sub json_true() returns JSON is native("libjansson") { * }
+    sub json_false() returns JSON is native("libjansson") { * }
+    sub json_null() returns JSON is native("libjansson") { * }
+
     method new (Str $data) {
         my $err = Error.new();
         # 0x4 for 'JSON_DECODE_ANY'
@@ -33,8 +41,8 @@ class JSON is repr('CPointer') {
 
     method specify() {
         given self.type {
-            when Hash { JSON::Object.new(json => self) }
-            when Array { JSON::Array.new(json => self) }
+            when Associative { JSON::Object.new(json => self) }
+            when Positional { JSON::Array.new(json => self) }
             default { self.get-simple-value() }
         }
     }
@@ -49,7 +57,7 @@ class JSON is repr('CPointer') {
 
     method is-complex() {
         my $type = self.type;
-        return True if $type ~~ Hash or $type ~~ Array;
+        return True if $type ~~ Associative or $type ~~ Positional;
         return False;
     }
 
@@ -58,17 +66,39 @@ class JSON is repr('CPointer') {
             when Str { json_string_value(self) }
             when Int { json_integer_value(self) }
             when Real { json_real_value(self) }
-            when True { True }
-            when False { False }
+            when Bool::True { True }
+            when Bool::False { False }
             when Nil { Nil }
         }
+    }
+
+    method encode(Mu $value) {
+        given $value {
+            # no double encoding
+            when JSON::Document { $value }
+            when Str { JSON::Document.new(json => json_string($value)) }
+            when Int { JSON::Document.new(json => json_integer($value)) }
+            when Num { JSON::Document.new(json => json_real($value)) }
+            when Associative { JSON::Object.encode($value) }
+            when Positional { JSON::Array.encode($value) }
+            when Bool {
+                if ($value) {
+                    JSON::Document.new(json => json_true());
+                } else {
+                    JSON::Document.new(json => json_false());
+                }
+            }
+            when Nil { JSON::Document.new(json => json_null()) }
+            default { die "cannot encode a value of type {$value.WHAT.perl}"}
+        }
+
     }
 
     method type() {
         my $struct = nativecast(Struct, self);
         given $struct.type {
-            when 0 { Hash }
-            when 1 { Array }
+            when 0 { Associative }
+            when 1 { Positional }
             when 2 { Str }
             when 3 { Int }
             when 4 { Real }
@@ -97,9 +127,26 @@ class JSON::Object is JSON::Document does Associative {
 
     }
 
+    sub json_object() returns JSON is native("libjansson") { * }
     sub json_object_iter_next(JSON, ObjectIter) returns ObjectIter is native("libjansson") { * }
     sub json_object_get(JSON, Str) returns JSON is native("libjansson") { * }
+    # _new indicates that the reference to the new JSON object isn't used after the
+    # assignment, so the reference is 'stolen'
+    #
+    # _nocheck disables jansson's UTF8 validity checking
+    # (P6 has that under control)
+    sub json_object_set_new_nocheck(JSON, Str, JSON) returns int is native("libjansson") { * }
     sub json_object_del(JSON, Str) returns int is native("libjansson") { * }
+
+    method encode(Associative $object) {
+        my $json-object = json_object();
+        for $object.kv -> $key, $value {
+            my $encoded-value = JSON.encode($value);
+            my $result = json_object_set_new_nocheck($json-object, $key, $encoded-value.json);
+            die "failure to add $value to Jansson array" if $result == -1;
+        }
+        return JSON::Object.new(json => $json-object);
+    }
 
     method iter_next($iter) { json_object_iter_next($.json, $iter) }
     method get(Str $key) { json_object_get($.json, $key).specify }
@@ -110,14 +157,14 @@ class JSON::Object is JSON::Document does Associative {
 
     method delete_key(Str $key) {
         my $ret = json_object_del($.json, $key);
-        return True if $ret == 0;
-        return False;
+        die "failed to delete key from Jansson object" if $ret == -1;
     }
 
     method keys() {
         my $iter = ObjectIter.new($.json);
-        my @keys := gather while ($iter = self.iter_next($iter)) {
+        my @keys := gather while $iter {
             take $iter.key();
+            $iter = self.iter_next($iter);
         }
     }
 
@@ -137,6 +184,7 @@ class JSON::Object is JSON::Document does Associative {
 }
 
 class JSON::Array is JSON::Document does Positional {
+    sub json_array() returns JSON is native("libjansson") { * }
     sub json_array_get(JSON, int) returns JSON is native("libjansson") { * }
     sub json_array_size(JSON) returns int is native("libjansson") { * }
     sub json_array_insert_new(JSON, int, JSON) returns int is native("libjansson") { * }
@@ -145,6 +193,16 @@ class JSON::Array is JSON::Document does Positional {
     sub json_array_remove(JSON, int) returns int is native("libjansson") { * }
     sub json_array_extend(JSON, JSON) returns int is native("libjansson") { * }
 
+    method encode(Positional $array) {
+        my $json-array = json_array();
+        for $array -> $item {
+            my $encoded-item = JSON.encode($item);
+            my $result = json_array_append_new($json-array, $encoded-item.json);
+            die "failure to add $item to Jansson object" if $result == -1;
+        }
+        return JSON::Array.new(json => $json-array);
+    }
+
     method get(int $index) { json_array_get($.json, $index).specify }
 
     method at_pos(int $index) {
@@ -152,13 +210,27 @@ class JSON::Array is JSON::Document does Positional {
     }
 
     method assign_pos(int $index, Mu $item) {
-        die 'NYI';
-        my $new-json = JSON.encode($item);
-        if $index < self.len {
-            my $ret = json_array_set_new($.json, $index, $new-json);
-            return True if $ret == 0;
+        my $encoded = JSON.encode($item);
+
+        # auto-extend the array, like P6.
+        # perhaps a dubious feature? breaks round-tripping because the values
+        # go in as 'null' and come out as 'Nil', rather than 'Any'
+        if $index > self.len - 1 {
+            while self.len - 1 < $index {
+                my $ret = json_array_append_new($.json, JSON.encode(Nil).json);
+                die "array extension failed in Jansson" if $ret == -1;
+            }
         }
-        return False;
+
+        die "index must be > 0" if $index < 0;
+
+        my $ret = json_array_set_new($.json, $index, $encoded.json);
+        die "array assignment failed in Jansson" if $ret == -1;
+    }
+
+    method delete_pos(int $index) {
+        my $result = json_array_remove($.json, $index);
+        die "array index deletion failed" if $result == -1;
     }
 
     method len() {
@@ -170,4 +242,12 @@ class JSON::Array is JSON::Document does Positional {
             take json_array_get($.json, $index).specify;
         }
     }
+}
+
+sub to-json($item) is export {
+    return JSON.encode($item).gist;
+}
+
+sub from-json(Str $json) is export {
+    return JSON.new($json);
 }
