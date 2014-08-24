@@ -2,7 +2,7 @@
 
 This is a basic Perl 6 binding to libjansson: a C library for manipulating JSON data.
 
-Still pretty rough! While JSON objects attempt to emulate P6 hashes or arrays, they don't have all the same capabilities.  In particular, assignment/building up new objects and consuming P6 types into JSON are not yet implemented.
+Still pretty rough! While JSON::Jansson objects attempt to emulate P6 hashes or arrays, they don't have all the same capabilities.
 
 JSON::Jansson is an appropriate choice if you're willing to trade features for
 speed. While JSON::Tiny is much more flexible and powerful, JSON::Jansson is
@@ -33,12 +33,10 @@ this was an ad-hoc comparison run off a busy laptop.
 
 ### TODO
 
-0. encoding p6 data structures into libjansson JSON objects
-1. manipulate JSON as a p6 data structure (partly done, needs ^ for assignment)
-2. don't leak memory (decref JSON pieces that are removed)
-3. option to copy all the data out of jansson land into p6 structures, rather
+0. don't leak memory (decref JSON pieces that are DESTROYed) -- made trickier by jansson using macros to define the decref functions, which NativeCall can't see.
+1. option to copy all the data out of jansson land into p6 structures, rather
 than manipulating jansson JSON objects via p6.
-4. tests
+2. tests
 
 ### LICENSE
 
@@ -46,8 +44,9 @@ Artistic License 2.0
 
 ### CREDITS
 
-The wonderful NativeCall module, and FROGGS/timotimo for answering some
-questions on #perl6.
+* The wonderful NativeCall module 
+* FROGGS/timotimo for answering some questions on #perl6.
+* colomon for spotting bugs by adding tests
 
 ### SEE ALSO
 
