@@ -170,15 +170,18 @@ class JSON::Object is JSON::Document does Associative {
 
     method values() {
         my $iter = ObjectIter.new($.json);
-        my @values := gather while ($iter = self.iter_next($iter)) {
+        my @values := gather while $iter {
             take $iter.value();
+            $iter = self.iter_next($iter);
+
         }
     }
 
     method kv() {
         my $iter = ObjectIter.new($.json);
-        my @pairs := gather while ($iter = self.iter_next($iter)) {
-            take $iter.key() => $iter.value();
+        my @pairs := gather while $iter {
+            take $iter.key(), $iter.value();
+            $iter = self.iter_next($iter);
         }
     }
 }
