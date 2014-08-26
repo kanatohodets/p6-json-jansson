@@ -19,24 +19,14 @@ this was an ad-hoc comparison run off a busy laptop.
 ### SYNOPSIS
 
     use JSON::Jansson;
-    my $object = JSON.new('{"foo": 42}');
-    say $object<foo>; # 42
-    say $object.type; # (Hash)
-
-    say $object.keys; # "foo"
-    say $object.values; # 42
-    say $object.kv; # "foo" 42
-
-    my $array = JSON.new('["quux", 4, true]');
-    say $array[0]; # "quux"
-    say $array[0 .. 1]; #"quux", 4
+    my %object = from-json('{"foo": ["a", 42, {"bar": "deep nesting"}]}');
+    my $str = to-json({foobar => [99, "lollipop"]});
 
 ### TODO
 
 0. don't leak memory (decref JSON pieces that are DESTROYed) -- made trickier by jansson using macros to define the decref functions, which NativeCall can't see.
-1. option to copy all the data out of jansson land into p6 structures, rather
-than manipulating jansson JSON objects via p6.
-2. tests
+1. tests
+2. decide if the methods to interface with jansson objects directly make sense to keep
 
 ### LICENSE
 
