@@ -33,3 +33,11 @@ say $json-foo;
 my $converted = from-json($data);
 say $converted;
 say $converted[0]<balance>;
+
+# invalid
+try {
+    my $converted = from-json('[1, 2, 3');
+    CATCH {
+        when X::JSON::ParseError { say "BLORG IT WAS BAD!" };
+    }
+}

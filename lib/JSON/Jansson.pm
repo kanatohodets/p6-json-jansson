@@ -6,15 +6,17 @@ class JSON::Array { ... };
 class JSON::Object { ... };
 
 class Jansson is repr('CPointer') {
-    class Error is repr('CStruct') {
-        has Str $.text;
-        has Str $.source;
+    my class X::JSON::ParseError is Exception { }
+
+    my class Error is repr('CStruct') {
+        has str $.text;
+        has str $.source;
         has int $.line;
         has int $.column;
         has int $.position;
     }
 
-    class Struct is repr('CStruct') {
+    my class Struct is repr('CStruct') {
         has int8 $.type;
         has int $.refcount;
     }
@@ -36,7 +38,12 @@ class Jansson is repr('CPointer') {
     method new (Str $data) {
         my $err = Error.new();
         # 0x4 for 'JSON_DECODE_ANY'
-        json_loads($data, 0x4, $err).specify;
+        my $result = json_loads($data, 0x4, $err);
+        # really we should take a peek at the contents of 'err' here,
+        # but that tends to segfault, so check for truthiness of $result (which
+        # is a falsy, empty type object if json_loads failed)
+        die X::JSON::ParseError.new(payload => "failed to parse JSON -- please check that the input string is valid") if !$result;
+        $result.specify;
     }
 
     method specify() {
