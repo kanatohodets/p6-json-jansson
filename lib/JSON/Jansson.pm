@@ -43,7 +43,7 @@ class JSON is repr('CPointer') {
         given self.type {
             when Associative { JSON::Object.new(json => self) }
             when Positional { JSON::Array.new(json => self) }
-            default { self.get-simple-value() }
+            default { JSON::Document.new(json => self) }
         }
     }
 
@@ -110,7 +110,7 @@ class JSON is repr('CPointer') {
 }
 
 class JSON::Document {
-    has $.json handles <refcount gist type>;
+    has $.json handles <refcount gist type is-complex get-simple-value>;
 }
 
 class JSON::Object is JSON::Document does Associative {
@@ -251,6 +251,26 @@ sub to-json($item) is export {
     return JSON.encode($item).gist;
 }
 
-sub from-json(Str $json) is export {
-    return JSON.new($json);
+sub convert(JSON::Document $json) {
+    return $json.get-simple-value if !$json.is-complex;
+
+    if $json.type ~~ Positional {
+        my $list = [];
+        for $json.enumerate() -> $value {
+            $list.push(convert($value));
+        }
+        return $list;
+    } elsif $json.type ~~ Associative {
+        my $hash = {};
+        for $json.kv -> $key, $value {
+            $hash{$key} = convert($value);
+        }
+        return $hash;
+    }
+}
+
+sub from-json(Str $json, $use-native-structures = False) is export {
+    my $decoded = JSON.new($json);
+    return $decoded if !$use-native-structures;
+    return convert($decoded);
 }

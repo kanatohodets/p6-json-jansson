@@ -29,3 +29,7 @@ my $json-foo = JSON.encode(@foo);
 say $json-foo;
 $json-foo[5] = '5th index';
 say $json-foo;
+
+my $converted = from-json($data, True);
+say $converted.WHAT;
+say $converted[0]<balance>;
