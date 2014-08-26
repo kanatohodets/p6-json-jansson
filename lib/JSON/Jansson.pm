@@ -5,7 +5,7 @@ class JSON::Document { ... };
 class JSON::Array { ... };
 class JSON::Object { ... };
 
-class JSON is repr('CPointer') {
+class Jansson is repr('CPointer') {
     class Error is repr('CStruct') {
         has Str $.text;
         has Str $.source;
@@ -19,19 +19,19 @@ class JSON is repr('CPointer') {
         has int $.refcount;
     }
 
-    sub json_loads(Str, int, Error) returns JSON is native("libjansson") { * }
-    sub json_dumps(JSON, int) returns Str is native("libjansson") { * }
+    sub json_loads(Str, int, Error) returns Jansson is native("libjansson") { * }
+    sub json_dumps(Jansson, int) returns Str is native("libjansson") { * }
 
-    sub json_string_value(JSON) returns Str is native("libjansson") { * }
-    sub json_integer_value(JSON) returns int is native("libjansson") { * }
-    sub json_real_value(JSON) returns num is native("libjansson") { * }
+    sub json_string_value(Jansson) returns Str is native("libjansson") { * }
+    sub json_integer_value(Jansson) returns int is native("libjansson") { * }
+    sub json_real_value(Jansson) returns num is native("libjansson") { * }
 
-    sub json_string(Str) returns JSON is native("libjansson") { * }
-    sub json_integer(int) returns JSON is native("libjansson") { * }
-    sub json_real(num) returns JSON is native("libjansson") { * }
-    sub json_true() returns JSON is native("libjansson") { * }
-    sub json_false() returns JSON is native("libjansson") { * }
-    sub json_null() returns JSON is native("libjansson") { * }
+    sub json_string(Str) returns Jansson is native("libjansson") { * }
+    sub json_integer(int) returns Jansson is native("libjansson") { * }
+    sub json_real(num) returns Jansson is native("libjansson") { * }
+    sub json_true() returns Jansson is native("libjansson") { * }
+    sub json_false() returns Jansson is native("libjansson") { * }
+    sub json_null() returns Jansson is native("libjansson") { * }
 
     method new (Str $data) {
         my $err = Error.new();
@@ -41,9 +41,9 @@ class JSON is repr('CPointer') {
 
     method specify() {
         given self.type {
-            when Associative { JSON::Object.new(json => self) }
-            when Positional { JSON::Array.new(json => self) }
-            default { JSON::Document.new(json => self) }
+            when Associative { JSON::Object.new(jansson => self) }
+            when Positional { JSON::Array.new(jansson => self) }
+            default { JSON::Document.new(jansson => self) }
         }
     }
 
@@ -76,19 +76,19 @@ class JSON is repr('CPointer') {
         given $value {
             # no double encoding
             when JSON::Document { $value }
-            when Str { JSON::Document.new(json => json_string($value)) }
-            when Int { JSON::Document.new(json => json_integer($value)) }
-            when Num { JSON::Document.new(json => json_real($value)) }
+            when Str { JSON::Document.new(jansson => json_string($value)) }
+            when Int { JSON::Document.new(jansson => json_integer($value)) }
+            when Num { JSON::Document.new(jansson => json_real($value)) }
             when Associative { JSON::Object.encode($value) }
             when Positional { JSON::Array.encode($value) }
             when Bool {
                 if ($value) {
-                    JSON::Document.new(json => json_true());
+                    JSON::Document.new(jansson => json_true());
                 } else {
-                    JSON::Document.new(json => json_false());
+                    JSON::Document.new(jansson => json_false());
                 }
             }
-            when Nil { JSON::Document.new(json => json_null()) }
+            when Nil { JSON::Document.new(jansson => json_null()) }
             default { die "cannot encode a value of type {$value.WHAT.perl}"}
         }
 
@@ -110,16 +110,16 @@ class JSON is repr('CPointer') {
 }
 
 class JSON::Document {
-    has $.json handles <refcount gist type is-complex get-simple-value>;
+    has $.jansson handles <refcount gist type is-complex get-simple-value>;
 }
 
 class JSON::Object is JSON::Document does Associative {
     my class ObjectIter is repr('CPointer') {
-        sub json_object_iter(JSON) returns ObjectIter is native("libjansson") { * }
+        sub json_object_iter(Jansson) returns ObjectIter is native("libjansson") { * }
         sub json_object_iter_key(ObjectIter) returns Str is native("libjansson") { * }
-        sub json_object_iter_value(ObjectIter) returns JSON is native("libjansson") { * }
+        sub json_object_iter_value(ObjectIter) returns Jansson is native("libjansson") { * }
 
-        method new(JSON $json) { json_object_iter($json); }
+        method new(Jansson $json) { json_object_iter($json); }
 
         method key() { json_object_iter_key(self); }
 
@@ -127,41 +127,41 @@ class JSON::Object is JSON::Document does Associative {
 
     }
 
-    sub json_object() returns JSON is native("libjansson") { * }
-    sub json_object_iter_next(JSON, ObjectIter) returns ObjectIter is native("libjansson") { * }
-    sub json_object_get(JSON, Str) returns JSON is native("libjansson") { * }
-    # _new indicates that the reference to the new JSON object isn't used after the
+    sub json_object() returns Jansson is native("libjansson") { * }
+    sub json_object_iter_next(Jansson, ObjectIter) returns ObjectIter is native("libjansson") { * }
+    sub json_object_get(Jansson, Str) returns Jansson is native("libjansson") { * }
+    # _new indicates that the reference to the new Jansson object isn't used after the
     # assignment, so the reference is 'stolen'
     #
     # _nocheck disables jansson's UTF8 validity checking
     # (P6 has that under control)
-    sub json_object_set_new_nocheck(JSON, Str, JSON) returns int is native("libjansson") { * }
-    sub json_object_del(JSON, Str) returns int is native("libjansson") { * }
+    sub json_object_set_new_nocheck(Jansson, Str, Jansson) returns int is native("libjansson") { * }
+    sub json_object_del(Jansson, Str) returns int is native("libjansson") { * }
 
     method encode(Associative $object) {
         my $json-object = json_object();
         for $object.kv -> $key, $value {
-            my $encoded-value = JSON.encode($value);
-            my $result = json_object_set_new_nocheck($json-object, $key, $encoded-value.json);
+            my $encoded-value = Jansson.encode($value);
+            my $result = json_object_set_new_nocheck($json-object, $key, $encoded-value.jansson);
             die "failure to add $value to Jansson array" if $result == -1;
         }
-        return JSON::Object.new(json => $json-object);
+        return JSON::Object.new(jansson => $json-object);
     }
 
-    method iter_next($iter) { json_object_iter_next($.json, $iter) }
-    method get(Str $key) { json_object_get($.json, $key).specify }
+    method iter_next($iter) { json_object_iter_next($.jansson, $iter) }
+    method get(Str $key) { json_object_get($.jansson, $key).specify }
 
     method at_key(Str $key) {
         self.get($key);
     }
 
     method delete_key(Str $key) {
-        my $ret = json_object_del($.json, $key);
+        my $ret = json_object_del($.jansson, $key);
         die "failed to delete key from Jansson object" if $ret == -1;
     }
 
     method keys() {
-        my $iter = ObjectIter.new($.json);
+        my $iter = ObjectIter.new($.jansson);
         my @keys := gather while $iter {
             take $iter.key();
             $iter = self.iter_next($iter);
@@ -169,7 +169,7 @@ class JSON::Object is JSON::Document does Associative {
     }
 
     method values() {
-        my $iter = ObjectIter.new($.json);
+        my $iter = ObjectIter.new($.jansson);
         my @values := gather while $iter {
             take $iter.value();
             $iter = self.iter_next($iter);
@@ -178,7 +178,7 @@ class JSON::Object is JSON::Document does Associative {
     }
 
     method kv() {
-        my $iter = ObjectIter.new($.json);
+        my $iter = ObjectIter.new($.jansson);
         my @pairs := gather while $iter {
             take $iter.key(), $iter.value();
             $iter = self.iter_next($iter);
@@ -187,68 +187,68 @@ class JSON::Object is JSON::Document does Associative {
 }
 
 class JSON::Array is JSON::Document does Positional {
-    sub json_array() returns JSON is native("libjansson") { * }
-    sub json_array_get(JSON, int) returns JSON is native("libjansson") { * }
-    sub json_array_size(JSON) returns int is native("libjansson") { * }
-    sub json_array_insert_new(JSON, int, JSON) returns int is native("libjansson") { * }
-    sub json_array_set_new(JSON, int, JSON) returns int is native("libjansson") { * }
-    sub json_array_append_new(JSON, JSON) returns int is native("libjansson") { * }
-    sub json_array_remove(JSON, int) returns int is native("libjansson") { * }
-    sub json_array_extend(JSON, JSON) returns int is native("libjansson") { * }
+    sub json_array() returns Jansson is native("libjansson") { * }
+    sub json_array_get(Jansson, int) returns Jansson is native("libjansson") { * }
+    sub json_array_size(Jansson) returns int is native("libjansson") { * }
+    sub json_array_insert_new(Jansson, int, Jansson) returns int is native("libjansson") { * }
+    sub json_array_set_new(Jansson, int, Jansson) returns int is native("libjansson") { * }
+    sub json_array_append_new(Jansson, Jansson) returns int is native("libjansson") { * }
+    sub json_array_remove(Jansson, int) returns int is native("libjansson") { * }
+    sub json_array_extend(Jansson, Jansson) returns int is native("libjansson") { * }
 
     method encode(Positional $array) {
         my $json-array = json_array();
         for $array -> $item {
-            my $encoded-item = JSON.encode($item);
-            my $result = json_array_append_new($json-array, $encoded-item.json);
+            my $encoded-item = Jansson.encode($item);
+            my $result = json_array_append_new($json-array, $encoded-item.jansson);
             die "failure to add $item to Jansson object" if $result == -1;
         }
-        return JSON::Array.new(json => $json-array);
+        return JSON::Array.new(jansson => $json-array);
     }
 
-    method get(int $index) { json_array_get($.json, $index).specify }
+    method get(int $index) { json_array_get($.jansson, $index).specify }
 
     method at_pos(int $index) {
         self.get($index);
     }
 
     method assign_pos(int $index, Mu $item) {
-        my $encoded = JSON.encode($item);
+        my $encoded = Jansson.encode($item);
 
         # auto-extend the array, like P6.
         # perhaps a dubious feature? breaks round-tripping because the values
         # go in as 'null' and come out as 'Nil', rather than 'Any'
         if $index > self.len - 1 {
             while self.len - 1 < $index {
-                my $ret = json_array_append_new($.json, JSON.encode(Nil).json);
+                my $ret = json_array_append_new($.jansson, Jansson.encode(Nil).jansson);
                 die "array extension failed in Jansson" if $ret == -1;
             }
         }
 
         die "index must be > 0" if $index < 0;
 
-        my $ret = json_array_set_new($.json, $index, $encoded.json);
+        my $ret = json_array_set_new($.jansson, $index, $encoded.jansson);
         die "array assignment failed in Jansson" if $ret == -1;
     }
 
     method delete_pos(int $index) {
-        my $result = json_array_remove($.json, $index);
+        my $result = json_array_remove($.jansson, $index);
         die "array index deletion failed" if $result == -1;
     }
 
     method len() {
-        json_array_size($.json);
+        json_array_size($.jansson);
     }
 
     method enumerate() {
         my @data := gather for ^self.len -> $index {
-            take json_array_get($.json, $index).specify;
+            take json_array_get($.jansson, $index).specify;
         }
     }
 }
 
 sub to-json($item) is export {
-    return JSON.encode($item).gist;
+    return Jansson.encode($item).gist;
 }
 
 sub convert(JSON::Document $json) {
@@ -269,8 +269,8 @@ sub convert(JSON::Document $json) {
     }
 }
 
-sub from-json(Str $json, $use-native-structures = False) is export {
-    my $decoded = JSON.new($json);
-    return $decoded if !$use-native-structures;
+sub from-json(Str $json, $use-jansson-repr = False) is export {
+    my $decoded = Jansson.new($json);
+    return $decoded if $use-jansson-repr;
     return convert($decoded);
 }

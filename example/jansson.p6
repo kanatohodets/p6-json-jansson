@@ -4,7 +4,7 @@ use JSON::Jansson;
 
 my $fh = open "example/small.json";
 my $data = $fh.slurp;
-my $json = JSON.new($data);
+my $json = Jansson.new($data);
 say $json.refcount;
 say $json.type;
 say $json[0]<tags>[0 .. 4];
@@ -13,7 +13,7 @@ $json[0].delete_key('friends');
 say $json[0].keys;
 
 my @array = (1, 2, 3, 4, [6, 7, 8, 9]);
-my $json-array = JSON.encode(@array);
+my $json-array = Jansson.encode(@array);
 say $json-array;
 
 $json-array[2] = <a b c d>;
@@ -25,11 +25,11 @@ say to-json({bloarg => $json-array});
 
 # empty array
 my @foo = ();
-my $json-foo = JSON.encode(@foo);
+my $json-foo = Jansson.encode(@foo);
 say $json-foo;
 $json-foo[5] = '5th index';
 say $json-foo;
 
-my $converted = from-json($data, True);
-say $converted.WHAT;
+my $converted = from-json($data);
+say $converted;
 say $converted[0]<balance>;
