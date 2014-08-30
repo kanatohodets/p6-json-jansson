@@ -276,8 +276,11 @@ sub convert(JSON::Document $json) {
     }
 }
 
-sub from-json(Str $json, $use-jansson-repr = False) is export {
+sub from-json(Str $json) is export {
     my $decoded = Jansson.new($json);
-    return $decoded if $use-jansson-repr;
     return convert($decoded);
+}
+
+sub jansson-from-json(Str $json) is export {
+    return Jansson.new($json);
 }

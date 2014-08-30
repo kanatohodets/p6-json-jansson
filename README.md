@@ -25,7 +25,7 @@ comparisons run off a busy laptop.
 
     # 2) access the data via a jansson handle (faster, but might not behave
     # exactly like you expect an array or hash to behave).
-    my $jansson-handle = from-json($json-for-import, True);
+    my $jansson-handle = jansson-from-json($json-for-import);
 
     # encoding
     my $json-for-export = to-json({foobar => [99, "lollipop"]});
