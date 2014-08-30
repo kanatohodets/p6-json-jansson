@@ -118,6 +118,10 @@ class Jansson is repr('CPointer') {
 
 class JSON::Document {
     has $.jansson handles <refcount gist type is-complex get-simple-value>;
+    method val() {
+        return self.get-simple-value if !self.is-complex;
+        return self;
+    }
 }
 
 class JSON::Object is JSON::Document does Associative {
@@ -159,7 +163,7 @@ class JSON::Object is JSON::Document does Associative {
     method get(Str $key) { json_object_get($.jansson, $key).specify }
 
     method at_key(Str $key) {
-        self.get($key);
+        self.get($key).val;
     }
 
     method delete_key(Str $key) {
@@ -178,7 +182,7 @@ class JSON::Object is JSON::Document does Associative {
     method values() {
         my $iter = ObjectIter.new($.jansson);
         my @values := gather while $iter {
-            take $iter.value();
+            take $iter.value().val;
             $iter = self.iter_next($iter);
 
         }
@@ -187,7 +191,7 @@ class JSON::Object is JSON::Document does Associative {
     method kv() {
         my $iter = ObjectIter.new($.jansson);
         my @pairs := gather while $iter {
-            take $iter.key(), $iter.value();
+            take $iter.key(), $iter.value().val;
             $iter = self.iter_next($iter);
         }
     }
@@ -216,7 +220,7 @@ class JSON::Array is JSON::Document does Positional {
     method get(int $index) { json_array_get($.jansson, $index).specify }
 
     method at_pos(int $index) {
-        self.get($index);
+        self.get($index).val;
     }
 
     method assign_pos(int $index, Mu $item) {
@@ -249,7 +253,7 @@ class JSON::Array is JSON::Document does Positional {
 
     method enumerate() {
         my @data := gather for ^self.len -> $index {
-            take json_array_get($.jansson, $index).specify;
+            take json_array_get($.jansson, $index).specify.val;
         }
     }
 }
@@ -258,9 +262,10 @@ sub to-json($item) is export {
     return Jansson.encode($item).gist;
 }
 
-sub convert(JSON::Document $json) {
-    return $json.get-simple-value if !$json.is-complex;
+sub convert($item) {
+    return $item if !$item.^parents.grep(JSON::Document);
 
+    my $json = $item;
     if $json.type ~~ Positional {
         my $list = [];
         for $json.enumerate() -> $value {
