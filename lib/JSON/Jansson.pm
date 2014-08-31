@@ -153,7 +153,7 @@ class JSON::Object is JSON::Document does Associative {
         my $json-object = json_object();
         for $object.kv -> $key, $value {
             my $encoded-value = Jansson.encode($value);
-            my $result = json_object_set_new_nocheck($json-object, $key, $encoded-value.jansson);
+            my $result = json_object_set_new_nocheck($json-object, $key.Str, $encoded-value.jansson);
             die "failure to add $value to Jansson array" if $result == -1;
         }
         return JSON::Object.new(jansson => $json-object);
