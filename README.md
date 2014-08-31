@@ -8,7 +8,7 @@ While JSON::Jansson tends to be much faster than JSON::Tiny (native libraries
 are cheating...), it is still a tad slower than than Perl 5's JSON::XS.
 
 For a quick example, on a 180mb JSON blob, JSON::XS parsed it in about 4 seconds,
-while generating a Jansson handle (`from-json($data, True)`) took about 13
+while generating a Jansson handle (`jansson-from-json($data)`) took about 13
 seconds.
 
 NB: The usual disclaimers about lies and benchmarks apply -- these are an ad-hoc
