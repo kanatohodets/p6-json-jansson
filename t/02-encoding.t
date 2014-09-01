@@ -4,9 +4,9 @@ use lib 'lib';
 use JSON::Jansson;
 
 
-my %hash = (a => 1, b => 2);
+my %hash = (a => 1);
 my $encoded-hash = to-json(%hash);
-is $encoded-hash, <{"a": 1, "b": 2}>, "basic hash encoding";
+is $encoded-hash, <{"a": 1}>, "basic hash encoding";
 
 my @array = (4, 5, "c", "d");
 my $encoded-array = to-json(@array);
@@ -25,5 +25,13 @@ is to-json([]), '[]', "encode empty array";
 is to-json({}), '{}', "encode empty hash";
 is to-json(().hash), '{}', 'encode ().hash';
 is to-json(().list), '[]', 'encode ().list';
+
+my $pushkin = " я помню чудное мгновенье ";
+is to-json([$pushkin]), <<[\"$pushkin\"]>>, 'encode array containing cyrillic';
+
+is to-json((undefined => <undefined>)), '{"undefined": "undefined"}', 'encode "undefined"';
+#is to-json((foo => Nil)), '{"foo": null}', 'does "Nil" encode into JSON null as an object value?';
+#is to-json($nil), 'null', 'does "Nil" encode into JSON null as a plain value?';
+dies_ok { to-json(sub { say "I can't be encoded!" }) }, "encode dies on un-encodable value";
 
 done;
