@@ -47,4 +47,4 @@ Artistic License 2.0
 
 ### SEE ALSO
 
-[JSON::Tiny](github.com/moritz/json)
+[JSON::Tiny](http://github.com/moritz/json)
