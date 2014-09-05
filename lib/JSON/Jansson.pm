@@ -271,6 +271,7 @@ class JSON::Array is JSON::Document does Positional {
     method pop() {
         my $last-pos = self.elems - 1;
         my $item = self.get($last-pos);
+        # incref to avoid the jansson object getting cleaned up after delete_pos.
         $item.incref;
         self.delete_pos($last-pos);
         return $item.val();

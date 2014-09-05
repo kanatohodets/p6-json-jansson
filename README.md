@@ -32,8 +32,8 @@ comparisons run off a busy laptop.
 
 ### TODO
 
-0. don't leak memory (decref JSON pieces that are DESTROYed) -- made trickier by jansson using macros to define the decref functions, which NativeCall can't see.
-1. tests
+0. don't leak memory (decref JSON pieces that are DESTROYed)
+1. more tests
 
 ### LICENSE
 
