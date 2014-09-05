@@ -51,7 +51,7 @@ my $json = Jansson.new($data);
 
 isa_ok $json, JSON::Array, "We got a JSON::Array object";
 isa_ok $json.type, 'Positional', ".type returns type object Positional";
-is $json.len, 1, ".len returns 1";
+is $json.elems, 1, ".elems returns 1";
 
 # my @json-as-array = $json.enumerate;
 # is +@json-as-array, 1, "json-as-array has one element";

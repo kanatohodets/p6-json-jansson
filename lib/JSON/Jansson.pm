@@ -250,8 +250,8 @@ class JSON::Array is JSON::Document does Positional {
         # auto-extend the array, like P6.
         # perhaps a dubious feature? breaks round-tripping because the values
         # go in as 'null' and come out as 'Nil', rather than 'Any'
-        if $index > self.len - 1 {
-            while self.len - 1 < $index {
+        if $index > self.elems - 1 {
+            while self.elems - 1 < $index {
                 my $ret = json_array_append_new($.jansson, Jansson.encode(Nil).jansson);
                 die "array extension failed in Jansson" if $ret == -1;
             }
@@ -268,12 +268,49 @@ class JSON::Array is JSON::Document does Positional {
         die "array index deletion failed" if $result == -1;
     }
 
-    method len() {
+    method pop() {
+        my $last-pos = self.elems - 1;
+        my $item = self.get($last-pos);
+        $item.incref;
+        self.delete_pos($last-pos);
+        return $item.val();
+    }
+
+    method push(*@values) {
+        for @values -> $value {
+            my $encoded = Jansson.encode($value);
+            my $success = json_array_append_new($.jansson, $encoded.jansson) == 0;
+            die "failed to push $value onto jansson array" if !$success;
+        }
+        self;
+    }
+
+    method shift() {
+        my $item = self.get(0);
+        $item.incref;
+        self.delete_pos(0);
+        return $item.val();
+    }
+
+    method unshift(*@values) {
+        for @values.reverse -> $value {
+            my $encoded = Jansson.encode($value);
+            my $success = json_array_insert_new($.jansson, 0, $encoded.jansson) == 0;
+            die "failed to unshift $value onto jansson array" if !$success;
+        }
+        self;
+    }
+
+    method splice(*@values) {
+
+    }
+
+    method elems() {
         json_array_size($.jansson);
     }
 
     method enumerate() {
-        my @data := gather for ^self.len -> $index {
+        my @data := gather for ^self.elems -> $index {
             take json_array_get($.jansson, $index).specify.val;
         }
         @data.eager;
