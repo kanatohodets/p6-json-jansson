@@ -19,10 +19,20 @@ class Jansson is repr('CPointer') {
     my class Struct is repr('CStruct') {
         has int8 $.type;
         has int $.refcount;
+        method incref() {
+            my $count = $.refcount;
+            $!refcount = $count + 1;
+        }
+
+        method decref() {
+            my $count = $.refcount;
+            $!refcount = $count - 1;
+        }
     }
 
     sub json_loads(Str, int, Error) returns Jansson is native("libjansson") { * }
     sub json_dumps(Jansson, int) returns Str is native("libjansson") { * }
+    sub json_delete(Jansson) is native("libjansson") { * }
 
     sub json_string_value(Jansson) returns Str is native("libjansson") { * }
     sub json_integer_value(Jansson) returns int is native("libjansson") { * }
@@ -57,6 +67,17 @@ class Jansson is repr('CPointer') {
     method refcount() {
         my $struct = nativecast(Struct, self);
         $struct.refcount;
+    }
+
+    method incref() {
+        my $struct = nativecast(Struct, self);
+        $struct.incref;
+    }
+
+    method decref() {
+        my $struct = nativecast(Struct, self);
+        $struct.decref;
+        json_delete(self) if self.refcount >= 0;
     }
 
     # 0x200 for 'JSON_ENCODE_ANY'
@@ -117,7 +138,7 @@ class Jansson is repr('CPointer') {
 }
 
 class JSON::Document {
-    has $.jansson handles <refcount gist type is-complex get-simple-value>;
+    has $.jansson handles <refcount incref decref gist type is-complex get-simple-value>;
     method val() {
         return self.get-simple-value if !self.is-complex;
         return self;
