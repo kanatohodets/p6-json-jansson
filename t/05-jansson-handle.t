@@ -9,6 +9,8 @@ is $jansson.gist, '[1, 2, "blorg", "bop"]', "jansson handle gist into JSON";
 $jansson[2] = "pow";
 is $jansson.gist, '[1, 2, "pow", "bop"]', "reassign index in array jansson handle";
 
+is $jansson[0 ... 2], (1, 2, "pow"), "array slice on a jansson array";
+
 is $jansson.elems, 4, "jansson.elems on an array";
 $jansson.delete_pos(2);
 is $jansson.gist, '[1, 2, "bop"]', "delete_pos removed item";
