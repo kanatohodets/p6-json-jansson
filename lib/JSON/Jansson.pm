@@ -30,20 +30,20 @@ class Jansson is repr('CPointer') {
         }
     }
 
-    sub json_loads(Str, int, Error) returns Jansson is native("libjansson") { * }
-    sub json_dumps(Jansson, int) returns Str is native("libjansson") { * }
-    sub json_delete(Jansson) is native("libjansson") { * }
+    sub json_loads(Str, int, Error) returns Jansson is native("libjansson") { ... }
+    sub json_dumps(Jansson, int) returns Str is native("libjansson") { ... }
+    sub json_delete(Jansson) is native("libjansson") { ... }
 
-    sub json_string_value(Jansson) returns Str is native("libjansson") { * }
-    sub json_integer_value(Jansson) returns int is native("libjansson") { * }
-    sub json_real_value(Jansson) returns num is native("libjansson") { * }
+    sub json_string_value(Jansson) returns Str is native("libjansson") { ... }
+    sub json_integer_value(Jansson) returns int is native("libjansson") { ... }
+    sub json_real_value(Jansson) returns num is native("libjansson") { ... }
 
-    sub json_string(Str) returns Jansson is native("libjansson") { * }
-    sub json_integer(int) returns Jansson is native("libjansson") { * }
-    sub json_real(num) returns Jansson is native("libjansson") { * }
-    sub json_true() returns Jansson is native("libjansson") { * }
-    sub json_false() returns Jansson is native("libjansson") { * }
-    sub json_null() returns Jansson is native("libjansson") { * }
+    sub json_string(Str) returns Jansson is native("libjansson") { ... }
+    sub json_integer(int) returns Jansson is native("libjansson") { ... }
+    sub json_real(num) returns Jansson is native("libjansson") { ... }
+    sub json_true() returns Jansson is native("libjansson") { ... }
+    sub json_false() returns Jansson is native("libjansson") { ... }
+    sub json_null() returns Jansson is native("libjansson") { ... }
 
     method new (Str $data) {
         my $err = Error.new();
@@ -147,9 +147,9 @@ class JSON::Document {
 
 class JSON::Object is JSON::Document does Associative {
     my class ObjectIter is repr('CPointer') {
-        sub json_object_iter(Jansson) returns ObjectIter is native("libjansson") { * }
-        sub json_object_iter_key(ObjectIter) returns Str is native("libjansson") { * }
-        sub json_object_iter_value(ObjectIter) returns Jansson is native("libjansson") { * }
+        sub json_object_iter(Jansson) returns ObjectIter is native("libjansson") { ... }
+        sub json_object_iter_key(ObjectIter) returns Str is native("libjansson") { ... }
+        sub json_object_iter_value(ObjectIter) returns Jansson is native("libjansson") { ... }
 
         method new(Jansson $json) { json_object_iter($json); }
 
@@ -159,16 +159,16 @@ class JSON::Object is JSON::Document does Associative {
 
     }
 
-    sub json_object() returns Jansson is native("libjansson") { * }
-    sub json_object_iter_next(Jansson, ObjectIter) returns ObjectIter is native("libjansson") { * }
-    sub json_object_get(Jansson, Str) returns Jansson is native("libjansson") { * }
+    sub json_object() returns Jansson is native("libjansson") { ... }
+    sub json_object_iter_next(Jansson, ObjectIter) returns ObjectIter is native("libjansson") { ... }
+    sub json_object_get(Jansson, Str) returns Jansson is native("libjansson") { ... }
     # _new indicates that the reference to the new Jansson object isn't used after the
     # assignment, so the reference is 'stolen'
     #
     # _nocheck disables jansson's UTF8 validity checking
     # (P6 has that under control)
-    sub json_object_set_new_nocheck(Jansson, Str, Jansson) returns int is native("libjansson") { * }
-    sub json_object_del(Jansson, Str) returns int is native("libjansson") { * }
+    sub json_object_set_new_nocheck(Jansson, Str, Jansson) returns int is native("libjansson") { ... }
+    sub json_object_del(Jansson, Str) returns int is native("libjansson") { ... }
 
     method encode(Associative $object) {
         my $json-object = json_object();
@@ -219,14 +219,14 @@ class JSON::Object is JSON::Document does Associative {
 }
 
 class JSON::Array is JSON::Document does Positional {
-    sub json_array() returns Jansson is native("libjansson") { * }
-    sub json_array_get(Jansson, int) returns Jansson is native("libjansson") { * }
-    sub json_array_size(Jansson) returns int is native("libjansson") { * }
-    sub json_array_insert_new(Jansson, int, Jansson) returns int is native("libjansson") { * }
-    sub json_array_set_new(Jansson, int, Jansson) returns int is native("libjansson") { * }
-    sub json_array_append_new(Jansson, Jansson) returns int is native("libjansson") { * }
-    sub json_array_remove(Jansson, int) returns int is native("libjansson") { * }
-    sub json_array_extend(Jansson, Jansson) returns int is native("libjansson") { * }
+    sub json_array() returns Jansson is native("libjansson") { ... }
+    sub json_array_get(Jansson, int) returns Jansson is native("libjansson") { ... }
+    sub json_array_size(Jansson) returns int is native("libjansson") { ... }
+    sub json_array_insert_new(Jansson, int, Jansson) returns int is native("libjansson") { ... }
+    sub json_array_set_new(Jansson, int, Jansson) returns int is native("libjansson") { ... }
+    sub json_array_append_new(Jansson, Jansson) returns int is native("libjansson") { ... }
+    sub json_array_remove(Jansson, int) returns int is native("libjansson") { ... }
+    sub json_array_extend(Jansson, Jansson) returns int is native("libjansson") { ... }
 
     method encode(Positional $array) {
         my $json-array = json_array();
