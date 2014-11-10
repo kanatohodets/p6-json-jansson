@@ -46,7 +46,7 @@ sub test-big-object($big-object) {
 }
 
 my $fh = open "t/small.json";
-my $data = $fh.slurp;
+my $data = $fh.slurp-rest;
 my $json = Jansson.new($data);
 
 isa_ok $json, JSON::Array, "We got a JSON::Array object";

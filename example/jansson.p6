@@ -3,7 +3,7 @@ use lib 'lib';
 use JSON::Jansson;
 
 my $fh = open "example/small.json";
-my $data = $fh.slurp;
+my $data = $fh.slurp-rest;
 my $json = Jansson.new($data);
 say $json.refcount;
 say $json.type;
