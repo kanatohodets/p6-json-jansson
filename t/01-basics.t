@@ -27,9 +27,6 @@ sub test-big-object($big-object) {
        "occaecat/sit/quis/laboris/proident/magna/tempor",
        "dup-tags attribute is correct even reached lazily";
 
-    # say $big-object<system>{"Origin"}.json.WHICH;
-    # say $big-object<system>{"X Axis"}.json.WHICH;
-    
     my $a = $big-object<system>{"Origin"};
     my $b = $big-object<system>{"X Axis"};
     @a := $a.enumerate;

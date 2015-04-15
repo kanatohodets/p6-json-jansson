@@ -12,10 +12,10 @@ is $jansson.gist, '[1, 2, "pow", "bop"]', "reassign index in array jansson handl
 is $jansson[0 ... 2], (1, 2, "pow"), "array slice on a jansson array";
 
 is $jansson.elems, 4, "jansson.elems on an array";
-$jansson.delete_pos(2);
-is $jansson.gist, '[1, 2, "bop"]', "delete_pos removed item";
-is $jansson.elems, 3, "delete_pos updated array length";
-is $jansson[2], "bop", "delete_pos updated index references";
+$jansson[2]:delete;
+is $jansson.gist, '[1, 2, "bop"]', "DELETE-POS removed item";
+is $jansson.elems, 3, "DELETE-POS updated array length";
+is $jansson[2], "bop", "DELETE-POS updated index references";
 
 $jansson[4] = "way over the limit";
 is $jansson.gist, '[1, 2, "bop", null, "way over the limit"]', 'array auto-extension with null items';

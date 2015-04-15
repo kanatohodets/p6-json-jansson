@@ -183,11 +183,11 @@ class JSON::Object is JSON::Document does Associative {
     method iter_next($iter) { json_object_iter_next($.jansson, $iter) }
     method get(Str $key) { json_object_get($.jansson, $key).specify }
 
-    method at_key(Str $key) {
+    method AT-KEY(Str $key) {
         self.get($key).val;
     }
 
-    method delete_key(Str $key) {
+    method DELETE-KEY(Str $key) {
         my $ret = json_object_del($.jansson, $key);
         die "failed to delete key from Jansson object" if $ret == -1;
     }
@@ -240,11 +240,11 @@ class JSON::Array is JSON::Document does Positional {
 
     method get(int $index) { json_array_get($.jansson, $index).specify }
 
-    method at_pos(int $index) {
+    method AT-POS(int $index) {
         self.get($index).val;
     }
 
-    method assign_pos(int $index, Mu $item) {
+    method ASSIGN-POS(int $index, Mu $item) {
         my $encoded = Jansson.encode($item);
 
         # auto-extend the array, like P6.
@@ -263,7 +263,7 @@ class JSON::Array is JSON::Document does Positional {
         die "array assignment failed in Jansson" if $ret == -1;
     }
 
-    method delete_pos(int $index) {
+    method DELETE-POS(int $index) {
         my $result = json_array_remove($.jansson, $index);
         die "array index deletion failed" if $result == -1;
     }
@@ -273,7 +273,7 @@ class JSON::Array is JSON::Document does Positional {
         my $item = self.get($last-pos);
         # incref to avoid the jansson object getting cleaned up after delete_pos.
         $item.incref;
-        self.delete_pos($last-pos);
+        self.DELETE-POS($last-pos);
         return $item.val();
     }
 
@@ -289,7 +289,7 @@ class JSON::Array is JSON::Document does Positional {
     method shift() {
         my $item = self.get(0);
         $item.incref;
-        self.delete_pos(0);
+        self.DELETE-POS(0);
         return $item.val();
     }
 
@@ -302,9 +302,7 @@ class JSON::Array is JSON::Document does Positional {
         self;
     }
 
-    method splice(*@values) {
-
-    }
+    method splice(*@values) { ... }
 
     method elems() {
         json_array_size($.jansson);

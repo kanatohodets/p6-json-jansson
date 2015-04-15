@@ -9,7 +9,7 @@ say $json.refcount;
 say $json.type;
 say $json[0]<tags>[0 .. 4];
 say $json[0].keys;
-$json[0].delete_key('friends');
+$json[0]<friends>:delete;
 say $json[0].keys;
 
 my @array = (1, 2, 3, 4, [6, 7, 8, 9]);
