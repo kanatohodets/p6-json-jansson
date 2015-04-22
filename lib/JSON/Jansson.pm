@@ -90,6 +90,7 @@ class Jansson is repr('CPointer') {
     }
 
     method get-simple-value() {
+        return Any if not defined self;
         given self.type {
             when Str { json_string_value(self) }
             when Int { json_integer_value(self) }
@@ -123,6 +124,7 @@ class Jansson is repr('CPointer') {
     }
 
     method type() {
+        return Any if not defined self;
         my $struct = nativecast(Struct, self);
         given $struct.type {
             when 0 { Associative }
