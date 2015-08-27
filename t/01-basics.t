@@ -4,7 +4,7 @@ use lib 'lib';
 use JSON::Jansson;
 
 sub test-big-object($big-object) {
-    isa_ok $big-object.type, 'Associative', "big object is Associative";
+    isa-ok $big-object.type, 'Associative', "big object is Associative";
     
     is $big-object<guid>, "fa418d28-e32d-4854-81c7-19de7bca5127", "guid lookup is correct";
     
@@ -46,8 +46,8 @@ my $fh = open "t/small.json";
 my $data = $fh.slurp-rest;
 my $json = Jansson.new($data);
 
-isa_ok $json, JSON::Array, "We got a JSON::Array object";
-isa_ok $json.type, 'Positional', ".type returns type object Positional";
+isa-ok $json, JSON::Array, "We got a JSON::Array object";
+isa-ok $json.type, 'Positional', ".type returns type object Positional";
 is $json.elems, 1, ".elems returns 1";
 
 # my @json-as-array = $json.enumerate;

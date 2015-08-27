@@ -36,6 +36,6 @@ my $complex-array = '[{"theKey": 9}, [3, 4, 5], "abcdef"]';
 my $complex-array-like = jansson-from-json($complex-array);
 is $complex-array-like[0]<theKey>, 9, "decode complex JSON array into jansson array-like";
 
-throws_like { my $invalid = jansson-from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
+throws-like { my $invalid = jansson-from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
 
 done;

@@ -19,7 +19,7 @@ my $nested-array-match = <"nested-array": [4, 5, "c", "d"]>;
 is so $encoded-nested-hash ~~ /$nested-array-match/, True, "complex object nesting 1";
 
 my %hash-with-numeric-keys = (0 => "a", 1 => "b");
-lives_ok {to-json %hash-with-numeric-keys}, 'convert a hash with numeric keys';
+lives-ok {to-json %hash-with-numeric-keys}, 'convert a hash with numeric keys';
 
 is to-json([]), '[]', "encode empty array";
 is to-json({}), '{}', "encode empty hash";
@@ -32,6 +32,6 @@ is to-json([$pushkin]), <<[\"$pushkin\"]>>, 'encode array containing cyrillic';
 is to-json((undefined => <undefined>)), '{"undefined": "undefined"}', 'encode "undefined"';
 #is to-json((foo => Nil)), '{"foo": null}', 'does "Nil" encode into JSON null as an object value?';
 #is to-json($nil), 'null', 'does "Nil" encode into JSON null as a plain value?';
-dies_ok { to-json(sub { say "I can't be encoded!" }) }, "encode dies on un-encodable value";
+dies-ok { to-json(sub { say "I can't be encoded!" }) }, "encode dies on un-encodable value";
 
 done;

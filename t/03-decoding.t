@@ -14,8 +14,8 @@ my $complex-array = '[{"theKey": 9}, [3, 4, 5], "abcdef"]';
 is from-json($complex-array), [{theKey => 9}, [3, 4, 5], "abcdef"], "decode complex JSON array into perl 6 array";
 
 #memory error in MVM? need to investigate
-#dies_ok { from-json('{[[') }, "decoding invalid JSON dies";
+#dies-ok { from-json('{[[') }, "decoding invalid JSON dies";
 
-throws_like { my $invalid = from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
+throws-like { my $invalid = from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
 
 done;
