@@ -120,7 +120,6 @@ class Jansson is repr('CPointer') {
             when Nil { JSON::Document.new(jansson => json_null()) }
             default { die "cannot encode a value of type {$value.WHAT.perl}"}
         }
-
     }
 
     method type() {
@@ -153,11 +152,11 @@ class JSON::Object is JSON::Document does Associative {
         sub json_object_iter_key(ObjectIter) returns Str is native("libjansson") { ... }
         sub json_object_iter_value(ObjectIter) returns Jansson is native("libjansson") { ... }
 
-        method new(Jansson $json) { json_object_iter($json); }
+        method new(Jansson $json) { json_object_iter($json) }
 
-        method key() { json_object_iter_key(self); }
+        method key() { my $val = json_object_iter_key(self) }
 
-        method value() { json_object_iter_value(self).specify; }
+        method value() { json_object_iter_value(self).specify }
 
     }
 
@@ -214,7 +213,8 @@ class JSON::Object is JSON::Document does Associative {
     method kv() {
         my $iter = ObjectIter.new($.jansson);
         my @pairs := gather while $iter {
-            take $iter.key(), $iter.value().val;
+            take $iter.key();
+            take $iter.value().val;
             $iter = self.iter_next($iter);
         }
     }
