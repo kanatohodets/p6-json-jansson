@@ -243,6 +243,8 @@ class JSON::Array is JSON::Document does Positional {
         return JSON::Array.new(jansson => $json-array);
     }
 
+    multi method Numeric(JSON::Array:D: ) { self.elems }
+
     method get(int $index) { json_array_get($.jansson, $index).specify }
 
     method AT-POS(int $index) {
