@@ -37,4 +37,4 @@ $jansson.unshift("a", "b", "c");
 is $jansson[0 ... 2], <a b c>, "unshift put multiple items onto the front of the jansson array";
 is $jansson.elems, $pre-unshift-len + 3, "unshifting 3 items increased the array len by 3";
 
-done;
+done-testing;

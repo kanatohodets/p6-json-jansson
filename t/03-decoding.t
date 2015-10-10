@@ -18,4 +18,4 @@ is from-json($complex-array), [{theKey => 9}, [3, 4, 5], "abcdef"], "decode comp
 
 throws-like { my $invalid = from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
 
-done;
+done-testing;

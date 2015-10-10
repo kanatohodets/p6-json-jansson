@@ -34,4 +34,4 @@ is to-json((undefined => <undefined>)), '{"undefined": "undefined"}', 'encode "u
 #is to-json($nil), 'null', 'does "Nil" encode into JSON null as a plain value?';
 dies-ok { to-json(sub { say "I can't be encoded!" }) }, "encode dies on un-encodable value";
 
-done;
+done-testing;

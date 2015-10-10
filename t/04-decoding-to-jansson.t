@@ -38,4 +38,4 @@ is $complex-array-like[0]<theKey>, 9, "decode complex JSON array into jansson ar
 
 throws-like { my $invalid = jansson-from-json("[1, 2, 3,"); }, X::JSON::ParseError, "caught an X::JSON::ParseError on invalid data";
 
-done;
+done-testing;

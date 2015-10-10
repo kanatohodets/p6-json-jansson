@@ -60,4 +60,4 @@ is $json.elems, 1, ".elems returns 1";
 my $big-object = $json[0];
 test-big-object($big-object);
 
-done;
+done-testing;
