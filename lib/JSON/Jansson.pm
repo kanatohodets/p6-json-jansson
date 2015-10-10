@@ -319,8 +319,10 @@ class JSON::Array is JSON::Document does Positional {
         my $data := gather for ^self.elems -> $index {
             take json_array_get($.jansson, $index).specify.val;
         }
-        $data.cache.eager;
+        $data.cache;
     }
+
+    method list { [ flat self.enumerate ] }
 }
 
 sub to-json($item) is export {
