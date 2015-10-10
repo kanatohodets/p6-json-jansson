@@ -195,28 +195,31 @@ class JSON::Object is JSON::Document does Associative {
 
     method keys() {
         my $iter = ObjectIter.new($.jansson);
-        my @keys := gather while $iter {
+        my $keys := gather while $iter {
             take $iter.key();
             $iter = self.iter_next($iter);
         }
+        $keys.cache;
     }
 
     method values() {
         my $iter = ObjectIter.new($.jansson);
-        my @values := gather while $iter {
+        my $values := gather while $iter {
             take $iter.value().val;
             $iter = self.iter_next($iter);
 
         }
+        $values.cache;
     }
 
     method kv() {
         my $iter = ObjectIter.new($.jansson);
-        my @pairs := gather while $iter {
+        my $pairs := gather while $iter {
             take $iter.key();
             take $iter.value().val;
             $iter = self.iter_next($iter);
         }
+        $pairs.cache;
     }
 }
 
@@ -311,10 +314,10 @@ class JSON::Array is JSON::Document does Positional {
     }
 
     method enumerate() {
-        my @data := gather for ^self.elems -> $index {
+        my $data := gather for ^self.elems -> $index {
             take json_array_get($.jansson, $index).specify.val;
         }
-        @data.eager;
+        $data.cache.eager;
     }
 }
 
